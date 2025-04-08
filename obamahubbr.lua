@@ -1,130 +1,154 @@
--- OBAMA HUB BR - By obamamalvado BR 😎🇧🇷
-local ObamaGUI = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Tabs = {}
-local Buttons = {}
+-- OBAMAHUB V2 by Lua God 💻
+-- Estilo moderno, bordas arredondas, scroll, botão de voltar e minimizar
 
-ObamaGUI.Name = "ObamaHubBR"
-ObamaGUI.Parent = game.CoreGui
-ObamaGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local TopBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local MinimizeButton = Instance.new("TextButton")
+local Drag = false
+local ScrollFrame = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+local ContentFrame = Instance.new("Frame")
+local BackButton = Instance.new("TextButton")
 
-Frame.Parent = ObamaGUI
-Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Frame.BorderColor3 = Color3.fromRGB(255, 255, 0)
-Frame.Position = UDim2.new(0.3, 0, 0.2, 0)
-Frame.Size = UDim2.new(0, 580, 0, 360)
+-- 🖥️ Parent do GUI
+ScreenGui.Name = "ObamaHub"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
 
-local function CreateTab(name)
-    local Tab = Instance.new("Frame")
-    Tab.Name = name
-    Tab.Parent = Frame
-    Tab.Size = UDim2.new(0, 580, 0, 360)
-    Tab.BackgroundTransparency = 1
-    Tab.Visible = false
-    Tabs[name] = Tab
-    return Tab
+-- 🎛️ Main Frame (menu principal)
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 500, 0, 350)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+-- 🧱 Top bar com título e minimizar
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.BorderSizePixel = 0
+
+Title.Name = "Title"
+Title.Parent = TopBar
+Title.Text = "ObamaHub V2"
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 22
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0.02, 0, 0, 0)
+Title.Size = UDim2.new(0.9, 0, 1, 0)
+
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Parent = TopBar
+MinimizeButton.Text = "-"
+MinimizeButton.Font = Enum.Font.SourceSansBold
+MinimizeButton.TextSize = 24
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MinimizeButton.Position = UDim2.new(0.92, 0, 0, 0)
+MinimizeButton.Size = UDim2.new(0.08, 0, 1, 0)
+
+MinimizeButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = false
+	wait(0.5)
+	MainFrame.Visible = true
+end)
+
+-- 📜 ScrollFrame com as abas
+ScrollFrame.Name = "ScrollFrame"
+ScrollFrame.Parent = MainFrame
+ScrollFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+ScrollFrame.Position = UDim2.new(0, 0, 0.1, 0)
+ScrollFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+ScrollFrame.ScrollBarThickness = 6
+ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+UIListLayout.Parent = ScrollFrame
+UIListLayout.Padding = UDim.new(0, 4)
+
+-- 📂 ContentFrame onde aparece o conteúdo da aba
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ContentFrame.Position = UDim2.new(0.3, 5, 0.1, 0)
+ContentFrame.Size = UDim2.new(0.7, -5, 0.9, 0)
+ContentFrame.BorderSizePixel = 0
+
+-- 🔙 Botão de voltar
+BackButton.Name = "BackButton"
+BackButton.Parent = ContentFrame
+BackButton.Text = "← Voltar"
+BackButton.Font = Enum.Font.SourceSansBold
+BackButton.TextSize = 18
+BackButton.TextColor3 = Color3.fromRGB(255, 215, 0)
+BackButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+BackButton.Position = UDim2.new(0, 10, 0, 10)
+BackButton.Size = UDim2.new(0, 100, 0, 30)
+
+BackButton.MouseButton1Click:Connect(function()
+	ContentFrame:ClearAllChildren()
+	BackButton.Parent = ContentFrame -- volta o botão
+end)
+
+-- 📁 Função pra criar botões no menu lateral
+local function CreateTab(name, callback)
+	local button = Instance.new("TextButton")
+	button.Name = name
+	button.Text = name
+	button.Font = Enum.Font.SourceSansBold
+	button.TextSize = 16
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	button.BorderColor3 = Color3.fromRGB(255, 215, 0)
+	button.Size = UDim2.new(1, -10, 0, 35)
+	button.Parent = ScrollFrame
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 6)
+	corner.Parent = button
+
+	button.MouseButton1Click:Connect(function()
+		ContentFrame:ClearAllChildren()
+		BackButton.Parent = ContentFrame
+		callback(ContentFrame)
+	end)
 end
 
-local function CreateButton(tab, text, func)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0, 200, 0, 40)
-    Button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Button.BorderColor3 = Color3.fromRGB(255, 255, 0)
-    Button.Text = text
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Parent = tab
-    Button.MouseButton1Click:Connect(func)
-    table.insert(Buttons, Button)
-    return Button
-end
-
--- Tabs
-local infoTab = CreateTab("Informations")
-infoTab.Visible = true
-
-local function switchTab(name)
-    for i, v in pairs(Tabs) do
-        v.Visible = false
-    end
-    Tabs[name].Visible = true
-end
-
-local y = 10
-local tabNames = {
-    "Informations", "Home", "Avatar", "Tool", "Animations", "Giant", "Skins",
-    "Car", "Music", "Brookhaven Music", "Trolling", "Filings", "Anti Protection", "Credits"
-}
-
-for _, tabName in ipairs(tabNames) do
-    local button = CreateButton(infoTab, tabName, function()
-        switchTab(tabName)
-    end)
-    button.Position = UDim2.new(0, 10, 0, y)
-    y = y + 45
-end
-
--- Funções de cada aba
-CreateButton(CreateTab("Home"), "Injetar SanderX", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/kigredns/SanderXV4.2.2/refs/heads/main/New.lua'))()
+-- 🧪 Exemplo de aba
+CreateTab("Home", function(frame)
+	local text = Instance.new("TextLabel")
+	text.Parent = frame
+	text.Size = UDim2.new(1, 0, 0, 50)
+	text.Position = UDim2.new(0, 0, 0.2, 0)
+	text.Text = "Bem-vindo ao ObamaHub V2!"
+	text.Font = Enum.Font.SourceSansBold
+	text.TextSize = 22
+	text.TextColor3 = Color3.fromRGB(255, 215, 0)
+	text.BackgroundTransparency = 1
 end)
 
-CreateButton(CreateTab("Avatar"), "XScripts ShadowHub", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/xscripts7/XScripts/refs/heads/XScript/ShadowHub", true))()
+-- 👇 ADICIONA AS ABAS AQUI (Ex: CreateTab("Avatar", function(frame) ... end))
+CreateTab("Avatar", function(frame)
+	local text = Instance.new("TextLabel")
+	text.Parent = frame
+	text.Size = UDim2.new(1, 0, 0, 50)
+	text.Position = UDim2.new(0, 0, 0.2, 0)
+	text.Text = "Editor de Avatar"
+	text.Font = Enum.Font.SourceSansBold
+	text.TextSize = 22
+	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	text.BackgroundTransparency = 1
 end)
 
-CreateButton(CreateTab("Tool"), "Tool Script", function()
-    loadstring(game:HttpGet("https://pastebin.com/raw/m0zjJLTv"))()
-end)
-
-CreateButton(CreateTab("Animations"), "Rael Hub", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Laelmano24/Rael-Hub/main/main.txt"))()
-end)
-
-CreateButton(CreateTab("Skins"), "Redz Hub", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Sxzayzsz/Redz-Hub/main/Script"))()
-end)
-
-CreateButton(CreateTab("Music"), "Tocar Música", function()
-    -- Música test
-    local sound = Instance.new("Sound", game.Workspace)
-    sound.SoundId = "rbxassetid://1843529277"
-    sound:Play()
-end)
-
-CreateButton(CreateTab("Brookhaven Music"), "Play Música 2", function()
-    local sound = Instance.new("Sound", game.Workspace)
-    sound.SoundId = "rbxassetid://1843529277"
-    sound:Play()
-end)
-
-CreateButton(CreateTab("Giant"), "Ficar Gigante", function()
-    game.Players.LocalPlayer.Character.Humanoid.BodyHeightScale.Value = 10
-end)
-
-CreateButton(CreateTab("Car"), "Spawn Carro", function()
-    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("spawn car", "All")
-end)
-
-CreateButton(CreateTab("Trolling"), "Explodir Mapinha 😈", function()
-    while true do
-        task.wait(0.1)
-        game.Workspace:Destroy()
-    end
-end)
-
-CreateButton(CreateTab("Filings"), "Zueira", function()
-    for _, v in pairs(game.Players:GetChildren()) do
-        v:Kick("Obama tá online 😎")
-    end
-end)
-
-CreateButton(CreateTab("Anti Protection"), "Bypass Basic", function()
-    setfflag("HumanoidParallelRemoveNoPhysics", "False")
-    setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
-end)
-
-CreateButton(CreateTab("Credits"), "Feito por: obamamalvado BR", function()
-    setclipboard("https://github.com/obamamalvado")
-end)
-
-print("✅ OBAMA HUB BR CARREGADO COM SUCESSO!")
+-- 👀 Pronto pra usar!
